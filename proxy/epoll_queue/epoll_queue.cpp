@@ -31,9 +31,9 @@ epoll_queue::epoll_queue(int epoll_size) : epoll(epoll_size) {
     timer.set_interval(TICK_INTERVAL, TICK_INTERVAL);
     auto timer_handler = [this](fd_state state) {
         if (state.is(fd_state::IN)) {
-            file_descriptor &timer = this->timer->second.get_fd();
+            file_descriptor &timer_in = this->timer->second.get_fd();
             uint64_t ticked = 0;
-            timer.read(&ticked, sizeof ticked);
+            timer_in.read(&ticked, sizeof ticked);
 
             ticks += ticked * TICK_INTERVAL;
             for (auto it = sockets.begin(); it != sockets.end();) {

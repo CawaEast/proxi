@@ -2,6 +2,7 @@
 #define PROXY_SERVER_FILE_DESCRIPTOR_H
 
 #include <unistd.h>
+#include <cstddef>
 #include <string>
 
 struct file_descriptor {
@@ -27,10 +28,10 @@ struct file_descriptor {
 
     friend std::string to_string(file_descriptor const &fd);
 
+    int fd;
+
 protected:
     file_descriptor();
-
-    int fd;
 };
 
 

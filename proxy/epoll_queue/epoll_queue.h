@@ -7,25 +7,27 @@
 
 static const int DEFAULT_QUEUE_SIZE = 200;
 static const size_t TICK_INTERVAL = 2;
-static const size_t SHORT_SOCKET_TIMEOUT = 60 * 2;
-static const size_t LONG_SOCKET_TIMEOUT = 60 * 10;
+static const size_t SHORT_SOCKET_TIMEOUT = 60 * 4;
+static const size_t LONG_SOCKET_TIMEOUT = 60 * 20;
 static const size_t INFINITE_TIMEOUT = (size_t) 1 << (4 * sizeof(size_t));
+//static const size_t SHORT_SOCKET_TIMEOUT = (size_t) 1 << (4 * sizeof(size_t));
+//static const size_t LONG_SOCKET_TIMEOUT = (size_t) 1 << (4 * sizeof(size_t));
 
 struct epoll_queue {
-
-    size_t ticks = 0;
-    epoll_core epoll;
-
-    epoll_queue() = delete;
-    epoll_queue(int size);
-
 
     using sockets_t = std::map<int, epoll_elem>;
     using connections_t = std::list<connection>;
 
+
+    epoll_core epoll;
     connections_t connections;
     sockets_t sockets;
     sockets_t::iterator timer;
+    size_t ticks = 0;
+
+    epoll_queue() = delete;
+
+    epoll_queue(int size);
 
     sockets_t::iterator save_registration(epoll_elem registration, size_t timeout);
 

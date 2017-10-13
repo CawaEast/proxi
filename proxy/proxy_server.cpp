@@ -13,9 +13,9 @@ proxy_server::proxy_server(int epoll_size, uint16_t port, int queue_size) : queu
 
     auto listener_handler = [this](fd_state state) {
         if (state.is(fd_state::IN)) {
-            socket_wrap &listener = *static_cast<socket_wrap *>(&this->listener->second.get_fd());
+            socket_wrap &listener_in = *static_cast<socket_wrap *>(&this->listener->second.get_fd());
             try {
-                socket_wrap client = listener.accept(socket_wrap::NONBLOCK);
+                socket_wrap client = listener_in.accept(socket_wrap::NONBLOCK);
                 log("new client accepted", client.get());
                 sockets_t::iterator it = this->queue.save_registration(std::move(client), fd_state::IN,
                                                                        SHORT_SOCKET_TIMEOUT);
@@ -30,8 +30,8 @@ proxy_server::proxy_server(int epoll_size, uint16_t port, int queue_size) : queu
     auto notifier_handler = [this](fd_state state) {
         if (state.is(fd_state::IN)) {
             uint64_t u;
-            file_descriptor &notifier = this->notifier->second.get_fd();
-            notifier.read(&u, sizeof(uint64_t));
+            file_descriptor &notifier_in = this->notifier->second.get_fd();
+            notifier_in.read(&u, sizeof(uint64_t));
 
             socket_wrap destination(socket_wrap::NONBLOCK);
 
@@ -74,14 +74,14 @@ proxy_server::proxy_server(int epoll_size, uint16_t port, int queue_size) : queu
 
             resolver_extra ip_extra = ip.get_extra();
             conn_it->get_client_registration().update(fd_state::RDHUP,
-                                                      [this, ip_extra, conn_it](fd_state state) {
+                                                      [this, ip_extra, conn_it](fd_state state_in) {
                                                           // If client disconnect while we haven't connected to server
-                                                          if (state.is(fd_state::RDHUP)) {
+                                                          if (state_in.is(fd_state::RDHUP)) {
                                                               log(conn_it, "client dropped connection");
-                                                              auto it = on_resolve.find(
+                                                              auto it_in = on_resolve.find(
                                                                       {ip_extra.socket, ip_extra.host});
-                                                              if (it != on_resolve.end()) {
-                                                                  on_resolve.erase(it);
+                                                              if (it_in != on_resolve.end()) {
+                                                                  on_resolve.erase(it_in);
                                                               }
                                                               this->queue.close(conn_it);
                                                           }
@@ -181,8 +181,8 @@ proxy_server::action_with_response proxy_server::handle_validation_response(conn
 
                 connect_to_server(it,
                                   rqst.get_header().get_property("host"),
-                                  [this, rqst](connections_t::iterator conn) {
-                                      fast_transfer(conn, rqst);
+                                  [this, rqst](connections_t::iterator conn_in) {
+                                      fast_transfer(conn_in, rqst);
                                   });
             } else {
                 fast_transfer(conn, rqst);

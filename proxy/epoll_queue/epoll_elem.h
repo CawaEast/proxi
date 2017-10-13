@@ -34,8 +34,7 @@ struct epoll_elem {
 
     void update(fd_state state, epoll_core::handler_t handler);
 
-    size_t timeout;
-    size_t expires_in;
+
 
     void change_timeout(size_t new_timeout);
 
@@ -43,10 +42,11 @@ struct epoll_elem {
 
     friend std::string to_string(epoll_elem &er);
 
-private:
     epoll_core *epoll; // It's here because of epoll_elem should be move-constructable
     file_descriptor fd;
     fd_state events;
+    size_t timeout;
+    size_t expires_in;
 };
 
 

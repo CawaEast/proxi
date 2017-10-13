@@ -204,11 +204,8 @@ bool should_cache(response_header const &header) {
         return false;
     }
 
-    if (!header.has_property("etag") && !header.has_property("last-modified")) {
-        return false;       // Otherwise can't validate
-    }
+    return !(!header.has_property("etag") && !header.has_property("last-modified"));
 
-    return true;
 }
 
 request_header make_validate_header(request_header rqst, response_header response) {

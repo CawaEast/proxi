@@ -1,5 +1,4 @@
 #include "fd_state.h"
-#include <sys/epoll.h>
 
 
 fd_state::fd_state() :

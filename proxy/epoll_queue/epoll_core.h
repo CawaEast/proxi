@@ -9,6 +9,7 @@
 
 struct epoll_core : file_descriptor {
     using handler_t = std::function<void(fd_state)>;
+    using handlers_t = std::map<int, handler_t>;
 
     epoll_core(int max_queue_size);
 
@@ -36,8 +37,6 @@ struct epoll_core : file_descriptor {
     friend void swap(epoll_core &first, epoll_core &second);
 
 private:
-    using handlers_t = std::map<int, handler_t>;
-
     epoll_event create_event(int fd, fd_state const &events);
 
     int queue_size;

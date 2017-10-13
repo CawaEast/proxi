@@ -185,7 +185,7 @@ void resolver::main_loop() {
                 ips = ips_t();
             }
         }
-        resolved_ip tmp(ips, htons(std::stoi(port)), std::move(p.extra));
+        resolved_ip tmp(ips, htons((uint16_t) std::stoi(port)), std::move(p.extra));
 
         {
             std::lock_guard<std::mutex> lg(out_mutex);

@@ -3,6 +3,8 @@
 
 
 #include <algorithm>
+#include <cstddef>
+#include <sys/epoll.h>
 
 struct fd_state {
     enum state {
