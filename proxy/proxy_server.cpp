@@ -1,6 +1,7 @@
 #include <sys/signalfd.h>
 #include "proxy_server.h"
 #include "util/event_fd.h"
+#include "util/signal_fd.h"
 
 
 proxy_server::proxy_server(int epoll_size, uint16_t port, int queue_size) : queue(epoll_size), rt() {
@@ -610,6 +611,21 @@ client_request proxy_server::make_validate_request(request_header rqst, response
 }
 
 void proxy_server::run() {
+    signal_fd sig_fd({SIGINT, SIGPIPE}, {signal_fd::SIMPLE});
+    epoll_elem signal_registration(queue.epoll, std::move(sig_fd), fd_state::IN);
+    signal_registration.update([&signal_registration, this](fd_state state) mutable {
+        if (state.is(fd_state::IN)) {
+            struct signalfd_siginfo sinf;
+            long size = signal_registration.get_fd().read(&sinf, sizeof(struct signalfd_siginfo));
+            if (size != sizeof(struct signalfd_siginfo)) {
+                return;
+            }
+            if (sinf.ssi_signo == SIGINT) {
+                log("\nserver", "stopped");
+                queue.epoll.stop_wait();
+            }
+        }
+    });
     queue.epoll.start_wait();
 }
 
