@@ -41,7 +41,8 @@ proxy_server::proxy_server(int epoll_size, uint16_t port, int queue_size) : queu
             sockets_t::iterator client = this->queue.sockets.find(ip.get_extra().socket);
             if (it == on_resolve.end()) {
                 // Client disconnected during resolving of ip
-                log(client, "client disconnected during resolving of ip");
+                std::string client_name = "registration " + std::to_string(ip.get_extra().socket);
+                log(client_name, "client disconnected during resolving of ip");
                 return;
             }
 
